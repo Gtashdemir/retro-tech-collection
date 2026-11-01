@@ -257,3 +257,35 @@ def delete_item(item_id):
 
     connection.commit()
     connection.close()
+
+def get_all_items():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, name, type, description, date_added, date_made
+        FROM items
+        ORDER BY id
+    """)
+
+    items = cursor.fetchall()
+    conn.close()
+
+    return items
+
+def get_all_items_by_type(item_type):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, name, type, description, date_added, date_made
+        FROM items
+        WHERE type = ?
+        ORDER BY id
+    """, (item_type,))
+
+    items = cursor.fetchall()
+
+    conn.close()
+
+    return items

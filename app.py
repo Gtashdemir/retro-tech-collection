@@ -38,6 +38,8 @@
 
 from datetime import datetime
 import database
+import csv
+import os
 
 
 database.create_table()
@@ -84,18 +86,19 @@ while True:
     print("  2. Show items by type")
     print("  3. Update item")
     print("  4. Delete item")
-    print("  5. Exit")
+    print("  5. Export collection")
+    print("  6. Exit")
     print("-" * 32)
 
     choice_text = input("Choose an option: ").strip()
 
     # Validate menu choice
     if choice_text == "":
-        print("Cannot be empty. Please enter a number from 1 to 5.")
+        print("Cannot be empty. Please enter a number from 1 to 6.")
         continue
 
-    if choice_text not in ("1", "2", "3", "4", "5"):
-        print("Invalid choice. Please enter a number from 1 to 5.")
+    if choice_text not in ("1", "2", "3", "4", "5", "6"):
+        print("Invalid choice. Please enter a number from 1 to 6.")
         continue
 
     choice = int(choice_text)
@@ -479,7 +482,97 @@ while True:
 
         print("Item deleted successfully!")
 
-    # Exit
+
     elif choice == 5:
+
+        while True:
+            print("\n" + "-" * 32)
+            print("EXPORT COLLECTION")
+            print("-" * 32)
+
+            print("1. Export all items")
+            print("2. Export by type")
+            print("3. Back")
+
+            export_choice = input("Choose an option: ").strip()
+
+            if export_choice == "":
+                print("Choice cannot be empty. Please enter a number from 1 to 3.")
+                continue
+
+            if export_choice not in ("1", "2", "3"):
+                print("Invalid choice. Please enter a number from 1 to 3.")
+                continue
+
+            if export_choice == "1":
+                items = database.get_all_items()
+
+                if not items:
+                    print("There are no items to export.")
+                    continue
+
+                os.makedirs("exports", exist_ok=True)
+
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+
+                filename = f"retro_tech_collection_{timestamp}.csv"
+                filepath = os.path.join("exports", filename)
+
+                with open(filepath, "w", newline="", encoding="utf-8") as file:
+                    writer = csv.writer(file)
+
+                    writer.writerow([
+                        "ID",
+                        "Name",
+                        "Type",
+                        "Description",
+                        "Date Added",
+                        "Date Made"
+                    ])
+
+                    writer.writerows(items)
+
+                print("\nExported", len(items), "items successfully.")
+                print("File:")
+                print(filepath)
+
+
+            elif export_choice == "2":
+                item_type = get_item_type()
+                items = database.get_all_items_by_type(item_type)
+
+                if not items:
+                    print("\nThere are no", item_type, "items to export.")
+                    continue
+
+                os.makedirs("exports", exist_ok=True)
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+                type_filename = item_type.lower().replace(" ", "_")
+                filename = f"{type_filename}_{timestamp}.csv"
+                filepath = os.path.join("exports", filename)
+
+                with open(filepath, "w", newline="", encoding="utf-8") as file:
+                    writer = csv.writer(file)
+                    writer.writerow([
+
+                        "ID",
+                        "Name",
+                        "Type",
+                        "Description",
+                        "Date Added",
+                        "Date Made"
+                    ])
+
+                    writer.writerows(items)
+
+                print("\nExported", len(items), item_type, "items successfully.")
+                print("File:")
+                print(filepath)
+
+            elif export_choice == "3":
+                break
+
+    # Exit
+    elif choice == 6:
         print("\nGoodbye!")
         break
